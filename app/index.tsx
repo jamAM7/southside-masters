@@ -26,11 +26,11 @@ export default function home() {
 
     <View style={styles.container}>
       <View style={styles.titleBar}>
-        <Text style={styles.titleText}>Southside Masters</Text>
+        <Text style={styles.titleText}>South Side Masters</Text>
 
-        <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
+        {/* <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
           <Image  source={require('./images/Windows_Settings_app_icon.png')} style={styles.settingsImage}/>
-        </Pressable>
+        </Pressable> */}
       </View>
 
       <Pressable onPress={handleScanEventsPress} style={styles.scanEventsTab}>

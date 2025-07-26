@@ -259,14 +259,17 @@ export default function ScanRunners() {
       <View style={styles.scanResultsTable}>
         <Text style={styles.scanResultsHeader}>Scanned Items</Text>
         <FlatList
-          data={scannedItems}
-          keyExtractor={(_, index) => index.toString()}
+          data={[...scannedItems].reverse()}
+          keyExtractor={(item, index) => `${item.type}-${item.data}-${index}`}
           renderItem={({ item }) => (
             <Text>
               <Text style={{ color: item.type === "place" ? "darkgreen" : "darkblue" }}>{item.type}</Text>: {item.data}
             </Text>
           )}
+          scrollEnabled={true}
+          showsVerticalScrollIndicator={true}
         />
+
       </View>
 
       {/* Back button */}

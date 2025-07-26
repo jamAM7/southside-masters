@@ -261,10 +261,12 @@ export default function Timing() {
           </View>
 
           {/* Scrollable Table */}
+
+          {/* Version 1 */}
           <View style={[styles.scanResultsTable, { height: '35%' }]}>
             <Text style={styles.scanResultsHeader}>Timing Results</Text>
             <FlatList
-              data={timingData}
+              data={[...timingData].reverse()}
               keyExtractor={(_, index) => index.toString()}
               renderItem={({ item }) => (
                 <Text>{`${item.place} ${item.time}`}</Text>
@@ -273,6 +275,7 @@ export default function Timing() {
               showsVerticalScrollIndicator={true}
             />
           </View>
+
 
           {/* Export Button */}
           <Pressable onPress={exportToCSV} style={styles.button}>
