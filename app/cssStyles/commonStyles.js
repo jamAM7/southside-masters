@@ -39,6 +39,17 @@ const commonStyles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  backButton: {
+    position: 'absolute',
+    margin: SETTINGS_IMAGE_MARGIN,
+    left: SETTINGS_IMAGE_MARGIN,
+    width: SETTINGS_IMAGE_SIZE,
+    height: SETTINGS_IMAGE_SIZE,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+
   settingsImage: {
     width: SETTINGS_IMAGE_SIZE,
     height: SETTINGS_IMAGE_SIZE,

@@ -7,10 +7,8 @@ import {
   Alert,
   Animated,
   FlatList,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
   TouchableWithoutFeedback,
   TouchableOpacity,
 } from "react-native";
@@ -18,10 +16,11 @@ import { useState, useRef, useEffect } from "react";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./cssStyles/commonStyles";
+import { Picker } from "@react-native-picker/picker";
 
-// Define entry type for list rendering
+// Define entry type
 type ScanEntry = {
   type: "athlete";
   data: string;
@@ -34,9 +33,10 @@ export default function ScanEvents() {
   const hasScannedRef = useRef(false);
 
   const backgroundColorAnim = useRef(new Animated.Value(0)).current;
-  const [scanResultColor, setScanResultColor] = useState<string>("#FFFFFF");
+  const [scanResultColor, setScanResultColor] = useState("#FFFFFF");
   const [scannedItems, setScannedItems] = useState<ScanEntry[]>([]);
-  const [raceCount, setRaceCount] = useState<string>("1");
+  const [raceCount, setRaceCount] = useState("1");
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -97,22 +97,20 @@ export default function ScanEvents() {
 
   const handleDelete = (index: number) => {
     const item = scannedItems[index];
-    Alert.alert(
-      "Delete Entry",
-      `Are you sure you want to delete ${item.race} ${item.data}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            const newItems = [...scannedItems];
-            newItems.splice(index, 1);
-            setScannedItems(newItems);
-          },
+    setHighlightedIndex(index);
+    Alert.alert("Delete Entry", `Delete ${item.race} ${item.data}?`, [
+      { text: "Cancel", style: "cancel", onPress: () => setHighlightedIndex(null) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          const newItems = [...scannedItems];
+          newItems.splice(index, 1);
+          setScannedItems(newItems);
+          setHighlightedIndex(null);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleScan = ({ data }: { data: string }) => {
@@ -184,11 +182,13 @@ export default function ScanEvents() {
   };
 
   if (!permission) return <View />;
-
   if (!permission.granted) {
     return (
       <View style={styles.container}>
         <View style={styles.titleBar}>
+          <Pressable onPress={handleHomePress} style={styles.backButton}>
+            <Image source={require("./images/back-arrow-icon.png")} style={styles.settingsImage} />
+          </Pressable>
           <Text style={styles.titleText}>Scan Events Page</Text>
           <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
             <Image source={require("./images/trash-can-icon-3.png")} style={styles.settingsImage} />
@@ -201,22 +201,18 @@ export default function ScanEvents() {
             <Text style={styles.buttonText}>Grant Permission</Text>
           </Pressable>
         </View>
-
-        <Pressable onPress={handleHomePress} style={styles.backTab}>
-          <Text style={styles.backTabText}>Back</Text>
-        </Pressable>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <TouchableWithoutFeedback onPress={() => null}>
         <View style={styles.container}>
           <View style={styles.titleBar}>
+            <Pressable onPress={handleHomePress} style={styles.backButton}>
+              <Image source={require("./images/back-arrow-icon.png")} style={styles.settingsImage} />
+            </Pressable>
             <Text style={styles.titleText}>Scan Events Page</Text>
             <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
               <Image source={require("./images/trash-can-icon-3.png")} style={styles.settingsImage} />
@@ -242,44 +238,43 @@ export default function ScanEvents() {
             <Text style={styles.buttonText}>Export as CSV</Text>
           </Pressable>
 
-          <View style={{ flexDirection: "row", width: "100%", padding: 10 }}>
-            <View style={{ flex: 1, backgroundColor: "#ffffff", padding: 10 }}>
+          <View style={{ flex: 1, flexDirection: "row", width: "100%", padding: 10 }}>
+            <View style={{ flex: 3, backgroundColor: "#ffffff", padding: 10 }}>
               <Text style={styles.scanResultsHeader}>Scanned Items</Text>
               <FlatList
                 data={scannedItems}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={({ item, index }) => (
                   <TouchableOpacity onPress={() => handleDelete(index)}>
-                    <View style={{ flexDirection: "row", marginBottom: 4 }}>
-                      <Text style={{ color: "darkblue", width: 40 }}>{item.race}</Text>
-                      <Text style={{ color: "darkblue" }}>{item.data}</Text>
+                    <View style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      paddingVertical: 4,
+                      backgroundColor: index === highlightedIndex ? "#d0e8ff" : "transparent",
+                      paddingHorizontal: 5,
+                    }}>
+                      <Text style={{ fontSize: 18, fontWeight: "500", flex: 1 }}>{item.race}</Text>
+                      <Text style={{ fontSize: 18, flex: 2 }}>{item.data}</Text>
                     </View>
                   </TouchableOpacity>
                 )}
               />
             </View>
 
-            <View style={{ width: 120, marginLeft: 10, backgroundColor: "#d0e8ff", padding: 10 }}>
+            <View style={{ flex: 1, marginLeft: 10, backgroundColor: "#d0e8ff", padding: 10 }}>
               <Text style={styles.scanResultsHeader}>Race</Text>
-              <TextInput
-                style={{
-                  backgroundColor: "#fff",
-                  borderColor: "#ccc",
-                  borderWidth: 1,
-                  padding: 8,
-                  borderRadius: 4,
-                  marginTop: 4,
-                }}
-                keyboardType="numeric"
-                value={raceCount}
-                onChangeText={(text) => setRaceCount(text.replace(/[^0-9]/g, ""))}
-              />
+              <Picker
+                selectedValue={raceCount}
+                onValueChange={(itemValue) => setRaceCount(itemValue)}
+                style={{ flex: 1, minWidth: 90 }}
+              >
+
+                {Array.from({ length: 20 }, (_, i) => (
+                  <Picker.Item key={i} label={`${i + 1}`} value={`${i + 1}`} />
+                ))}
+              </Picker>
             </View>
           </View>
-
-          <Pressable onPress={handleHomePress} style={styles.backTab}>
-            <Text style={styles.backTabText}>Back</Text>
-          </Pressable>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

@@ -1,5 +1,3 @@
-// ScanRunners.tsx
-
 import { useRouter } from "expo-router";
 import {
   Image,
@@ -198,12 +196,29 @@ export default function ScanRunners() {
     }
   };
 
+  const groupedPairs = [];
+  for (let i = 0; i < scannedItems.length - 1; i++) {
+    if (
+      scannedItems[i].type === "place" &&
+      scannedItems[i + 1].type === "athlete"
+    ) {
+      groupedPairs.push({
+        place: scannedItems[i].data,
+        athlete: scannedItems[i + 1].data,
+      });
+      i++;
+    }
+  }
+
   if (!permission) return <View />;
 
   if (!permission.granted) {
     return (
       <View style={styles.container}>
         <View style={styles.titleBar}>
+          <Pressable onPress={handleHomePress} style={styles.settingsButton}>
+            <Image source={require("./images/back-arrow-icon.png")} style={styles.settingsImage} />
+          </Pressable>
           <Text style={styles.titleText}>Scan Runners Page</Text>
           <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
             <Image source={require("./images/trash-can-icon-3.png")} style={styles.settingsImage} />
@@ -216,10 +231,6 @@ export default function ScanRunners() {
             <Text style={styles.buttonText}>Grant Permission</Text>
           </Pressable>
         </View>
-
-        <Pressable onPress={handleHomePress} style={styles.backTab}>
-          <Text style={styles.backTabText}>Back</Text>
-        </Pressable>
       </View>
     );
   }
@@ -228,6 +239,9 @@ export default function ScanRunners() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.titleBar}>
+        <Pressable onPress={handleHomePress} style={styles.backButton}>
+          <Image source={require("./images/back-arrow-icon.png")} style={styles.settingsImage} />
+        </Pressable>
         <Text style={styles.titleText}>Scan Runners Page</Text>
         <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
           <Image source={require("./images/trash-can-icon-3.png")} style={styles.settingsImage} />
@@ -255,27 +269,30 @@ export default function ScanRunners() {
         <Text style={styles.buttonText}>Export as CSV</Text>
       </Pressable>
 
-      {/* Results Table */}
-      <View style={styles.scanResultsTable}>
-        <Text style={styles.scanResultsHeader}>Scanned Items</Text>
+      {/* Paired Results Table */}
+      <View style={{ flex: 1, backgroundColor: 'white', width: '100%', paddingVertical: 10 }}>
+        <Text style={[styles.scanResultsHeader, { paddingHorizontal: 20 }]}>Scanned Pairs</Text>
         <FlatList
-          data={[...scannedItems].reverse()}
-          keyExtractor={(item, index) => `${item.type}-${item.data}-${index}`}
+          data={groupedPairs}
+          keyExtractor={(item, index) => `${item.place}-${item.athlete}-${index}`}
           renderItem={({ item }) => (
-            <Text>
-              <Text style={{ color: item.type === "place" ? "darkgreen" : "darkblue" }}>{item.type}</Text>: {item.data}
-            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingVertical: 8,
+                paddingHorizontal: 20,
+                width: '100%',
+              }}
+            >
+              <Text style={{ fontSize: 18, color: "darkgreen", flex: 1 }}>{item.place}</Text>
+              <Text style={{ fontSize: 18, color: "darkblue", flex: 1, textAlign: "right" }}>{item.athlete}</Text>
+            </View>
           )}
-          scrollEnabled={true}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={true}
         />
-
       </View>
-
-      {/* Back button */}
-      <Pressable onPress={handleHomePress} style={styles.backTab}>
-        <Text style={styles.backTabText}>Back</Text>
-      </Pressable>
     </View>
   );
 }
