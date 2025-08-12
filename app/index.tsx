@@ -36,7 +36,7 @@ export default function home() {
   return (
     <View style={styles.container}>
       <View style={styles.titleBar}>
-        <Text style={styles.titleText}>South Side Masters</Text>
+        <Text style={styles.titleText}>Southside Masters</Text>
         {/* <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
           <Image  source={require('./images/Windows_Settings_app_icon.png')} style={styles.settingsImage}/>
         </Pressable> */}
